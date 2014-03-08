@@ -1,3 +1,11 @@
+package 'python-software-properties' do
+  action :nothing
+end.run_action(:install)
+
+execute 'add-apt-repository ppa:ubuntu-lxc/daily' do
+  action :nothing
+end.run_action(:run)
+
 execute 'apt-get update' do
   action :nothing
 end.run_action(:run)
