@@ -1,6 +1,14 @@
 # Ubuntu 12, not Ubuntu 14
 if node['platform'] == 'ubuntu' && node['platform_version'].to_i == 12
+  execute 'apt-get update' do
+    action :nothing
+  end.run_action(:run)
+
   package 'python-software-properties' do
+    action :nothing
+  end.run_action(:install)
+
+  package 'make' do
     action :nothing
   end.run_action(:install)
 end
