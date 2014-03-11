@@ -1,7 +1,9 @@
 # Ubuntu 12, not Ubuntu 14
-#package 'python-software-properties' do
-#  action :nothing
-#end.run_action(:install)
+if node['platform'] == 'ubuntu' && node['platform_version'].to_i == 12
+  package 'python-software-properties' do
+    action :nothing
+  end.run_action(:install)
+end
 
 execute 'add-apt-repository ppa:ubuntu-lxc/daily' do
   action :nothing
@@ -11,7 +13,18 @@ execute 'apt-get update' do
   action :nothing
 end.run_action(:run)
 
+# Needed for Ubuntu 14, not Ubuntu 12
+if node['platform'] == 'ubuntu' && node['platform_version'].to_i == 14
+  package 'ruby1.9.1-dev' do
+    action :nothing
+  end.run_action(:upgrade)
+end
+
 package 'lxc' do
+  action :nothing
+end.run_action(:upgrade)
+
+package 'lxc-dev' do
   action :nothing
 end.run_action(:upgrade)
 
