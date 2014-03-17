@@ -13,7 +13,7 @@ if node['platform'] == 'ubuntu' && node['platform_version'].to_i == 12
   end.run_action(:install)
 end
 
-execute 'add-apt-repository ppa:ubuntu-lxc/daily' do
+execute 'add-apt-repository ppa:ubuntu-lxc/stable' do
   action :nothing
 end.run_action(:run)
 
