@@ -64,11 +64,6 @@ module ChefMetalLXC
         end
       end
 
-      if true # do a check on whether sshd is installed.  This is idempotency!
-        provider.converge_by "install ssh into container #{provisioner_output['name']}" do
-        end
-      end
-
       node['normal']['provisioner_output'] = provisioner_output
 
       # Create machine object for callers to use
