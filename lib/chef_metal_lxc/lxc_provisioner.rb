@@ -47,7 +47,6 @@ module ChefMetalLXC
         'name' => node['name']
       }
 
-
       # Create the container if it does not exist
       ct = LXC::Container.new(provisioner_output['name'], lxc_path_for(node))
       unless ct.defined?
@@ -114,8 +113,10 @@ module ChefMetalLXC
     end
 
     def convergence_strategy_for(node)
-      require 'chef_metal/convergence_strategy/install_sh'
-      ChefMetal::ConvergenceStrategy::InstallSh.new
+      @convergence_strategy ||= begin
+        require 'chef_metal/convergence_strategy/install_cached'
+        ChefMetal::ConvergenceStrategy::InstallCached.new
+      end
     end
 
     def transport_for(node)
