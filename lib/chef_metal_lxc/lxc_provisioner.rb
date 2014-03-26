@@ -55,7 +55,7 @@ module ChefMetalLXC
         end
       end
       unless ct.running?
-        provider.converge_by "start lxc container #{provisioner_output['name']}" do
+        provider.converge_by "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
           ct.start
           while ct.ip_addresses.empty?
             sleep 1 # wait till dhcp ip allocation is done
