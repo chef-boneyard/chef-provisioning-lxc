@@ -54,9 +54,12 @@ module ChefMetalLXC
           ct.create(provisioner_options['template'], provisioner_options['backingstore'], 0, provisioner_options['template_options'])
         end
       end
+
       unless ct.running?
         provider.converge_by "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
-          ct.start
+          # Have to shell out to lxc-start for now, ct.start holds server sockets open!
+          shell_out!("lxc-start -d -n #{provisioner_output['name']}")
+#          ct.start
           while ct.ip_addresses.empty?
             sleep 1 # wait till dhcp ip allocation is done
           end
@@ -64,7 +67,6 @@ module ChefMetalLXC
       end
 
       node['normal']['provisioner_output'] = provisioner_output
-
       # Create machine object for callers to use
       machine_for(node)
     end
