@@ -60,6 +60,14 @@ module ChefMetalLXC
         end
       end
 
+      # Unfreeze the frozen
+      if ct.state == :frozen
+        provider.converge_by "unfreeze lxc container #{provisioner_output['name']} (state is #{ct.state})" do
+          ct.unfreeze
+        end
+      end
+
+      # Get stopped containers running
       unless ct.running?
         provider.converge_by "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
           # Have to shell out to lxc-start for now, ct.start holds server sockets open!
