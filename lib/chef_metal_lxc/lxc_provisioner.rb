@@ -8,6 +8,12 @@ module ChefMetalLXC
 
     include Chef::Mixin::ShellOut
 
+    def initialize(lxc_path = nil)
+      @lxc_path = lxc_path || LXC.global_config_item('lxc.lxcpath')
+    end
+
+    attr_reader :lxc_path
+
     #
     # Acquire a machine, generally by provisioning it.  Returns a Machine
     # object pointing at the machine, allowing useful actions like setup,
@@ -33,8 +39,7 @@ module ChefMetalLXC
     #        about the created machine.  For lxc, it is a hash with this
     #        format:
     #
-    #           -- provisioner_url: lxc://<lxc_path>
-    #           -- lxc_path: path to lxc root
+    #           -- provisioner_url: lxc:<lxc_path>
     #           -- name: container name
     #
     def acquire_machine(provider, node)
@@ -43,12 +48,12 @@ module ChefMetalLXC
       # Set up the modified node data
       provisioner_options = node['normal']['provisioner_options']
       provisioner_output = node['normal']['provisioner_output'] || {
-        'provisioner_url' =>   "lxc://#{lxc_path_for(node)}",
+        'provisioner_url' =>   "lxc:#{lxc_path}",
         'name' => node['name']
       }
 
       # Create the container if it does not exist
-      ct = LXC::Container.new(provisioner_output['name'], lxc_path_for(node))
+      ct = LXC::Container.new(provisioner_output['name'], lxc_path)
       unless ct.defined?
         provider.converge_by "create lxc container #{provisioner_output['name']}" do
           ct.create(provisioner_options['template'], provisioner_options['backingstore'], 0, provisioner_options['template_options'])
@@ -79,7 +84,7 @@ module ChefMetalLXC
     def delete_machine(provider, node)
       if node['normal'] && node['normal']['provisioner_output']
         provisioner_output = node['normal']['provisioner_output']
-        ct = LXC::Container.new(provisioner_output['name'], lxc_path_for(node))
+        ct = LXC::Container.new(provisioner_output['name'], lxc_path)
         if ct.defined?
           provider.converge_by "delete lxc container #{provisioner_output['name']}" do
             ct.destroy
@@ -93,7 +98,7 @@ module ChefMetalLXC
       provisioner_options = node['normal']['provisioner_options']
       if node['normal'] && node['normal']['provisioner_output']
         provisioner_output = node['normal']['provisioner_output']
-        ct = LXC::Container.new(provisioner_output['name'], lxc_path_for(node))
+        ct = LXC::Container.new(provisioner_output['name'], lxc_path)
         if ct.running?
           provider.converge_by "delete lxc container #{provisioner_output['name']}" do
             ct.stop
@@ -103,11 +108,6 @@ module ChefMetalLXC
     end
 
     protected
-
-    def lxc_path_for(node)
-      provisioner_options = node['normal']['provisioner_options']
-      provisioner_options['lxc_path']  || LXC.global_config_item('lxc.lxcpath')
-    end
 
     def machine_for(node)
       require 'chef_metal/machine/unix_machine'
@@ -124,7 +124,7 @@ module ChefMetalLXC
     def transport_for(node)
       require 'chef_metal_lxc/lxc_transport'
       provisioner_output = node['normal']['provisioner_output']
-      ChefMetalLXC::LXCTransport.new(provisioner_output['name'], lxc_path_for(node))
+      ChefMetalLXC::LXCTransport.new(provisioner_output['name'], lxc_path)
     end
   end
 end
