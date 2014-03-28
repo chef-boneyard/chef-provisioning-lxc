@@ -1,6 +1,10 @@
 require 'chef/mixin/shell_out'
 require 'chef_metal/provisioner'
+require 'chef_metal/machine/unix_machine'
+require 'chef_metal/convergence_strategy/install_cached'
+require 'chef_metal_lxc/lxc_transport'
 require 'lxc'
+require 'shellwords'
 
 module ChefMetalLXC
   # Provisions machines in lxc.
@@ -34,6 +38,8 @@ module ChefMetalLXC
     #           -- template: template name
     #           -- template_options: additional arguments for templates
     #           -- backingstore: backing storage (lvm, thinpools, btrfs etc)
+    #           -- config_file: <path> path to LXC  file a la https://wiki.archlinux.org/index.php/Linux_Containers#Configuration_file
+    #           -- extra_config: { 'key' => 'value', ... } a set of LXC config key/value pairs to individually set.  Merges with, and overrides any values in config_file.
     #
     #        node['normal']['provisioner_output'] will be populated with information
     #        about the created machine.  For lxc, it is a hash with this
@@ -56,6 +62,22 @@ module ChefMetalLXC
       ct = LXC::Container.new(provisioner_output['name'], lxc_path)
       unless ct.defined?
         provider.converge_by "create lxc container #{provisioner_output['name']}" do
+          #
+          # Set config
+          #
+          # TODO if config file changes, reload container?
+          if provisioner_options['config_file']
+            ct.load_config(provisioner_options['config_file'])
+          end
+          if provisioner_options['extra_config']
+            provisioner_options['extra_config'].each_pair do |key, value|
+              ct.set_config_item(key, value)
+            end
+          end
+
+          #
+          # Create the machine
+          #
           ct.create(provisioner_options['template'], provisioner_options['backingstore'], 0, provisioner_options['template_options'])
         end
       end
@@ -71,11 +93,18 @@ module ChefMetalLXC
       unless ct.running?
         provider.converge_by "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
           # Have to shell out to lxc-start for now, ct.start holds server sockets open!
-          shell_out!("lxc-start -d -n #{provisioner_output['name']}")
+          lxc_start = "lxc-start -d -n #{Shellwords.escape(provisioner_output['name'])}"
+# TODO add ability to change options on start
+#          if provisioner_options['config_file']
+#            lxc_start << " -f #{Shellwords.escape(provisioner_options['config_file'])}"
+#          end
+#          if provisioner_options['extra_config']
+#            provisioner_options['extra_config'].each_pair do |key,value|
+#              lxc_start << " -s #{Shellwords.escape("#{key}=#{value}")}"
+#            end
+#          end
+          shell_out!(lxc_start)
 #          ct.start
-          while ct.ip_addresses.empty?
-            sleep 1 # wait till dhcp ip allocation is done
-          end
         end
       end
 
@@ -118,19 +147,16 @@ module ChefMetalLXC
     protected
 
     def machine_for(node)
-      require 'chef_metal/machine/unix_machine'
       ChefMetal::Machine::UnixMachine.new(node, transport_for(node), convergence_strategy_for(node))
     end
 
     def convergence_strategy_for(node)
       @convergence_strategy ||= begin
-        require 'chef_metal/convergence_strategy/install_cached'
         ChefMetal::ConvergenceStrategy::InstallCached.new
       end
     end
 
     def transport_for(node)
-      require 'chef_metal_lxc/lxc_transport'
       provisioner_output = node['normal']['provisioner_output']
       ChefMetalLXC::LXCTransport.new(provisioner_output['name'], lxc_path)
     end
