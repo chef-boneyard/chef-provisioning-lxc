@@ -26,7 +26,7 @@ module ChefMetalLXC
     # different from the original node object).
     #
     # ## Parameters
-    # provider - the provider object that is calling this method.
+    # action_handler - the action_handler object that provides context.
     # node - node object (deserialized json) representing this machine.  If
     #        the node has a provisioner_options hash in it, these will be used
     #        instead of options provided by the provisioner.  TODO compare and
@@ -48,7 +48,7 @@ module ChefMetalLXC
     #           -- provisioner_url: lxc:<lxc_path>
     #           -- name: container name
     #
-    def acquire_machine(provider, node)
+    def acquire_machine(action_handler, node)
       # TODO verify that the existing provisioner_url in the node is the same as ours
 
       # Set up the modified node data
@@ -61,7 +61,7 @@ module ChefMetalLXC
       # Create the container if it does not exist
       ct = LXC::Container.new(provisioner_output['name'], lxc_path)
       unless ct.defined?
-        provider.converge_by "create lxc container #{provisioner_output['name']}" do
+        action_handler.perform_action "create lxc container #{provisioner_output['name']}" do
           #
           # Set config
           #
@@ -84,14 +84,14 @@ module ChefMetalLXC
 
       # Unfreeze the frozen
       if ct.state == :frozen
-        provider.converge_by "unfreeze lxc container #{provisioner_output['name']} (state is #{ct.state})" do
+        action_handler.perform_action "unfreeze lxc container #{provisioner_output['name']} (state is #{ct.state})" do
           ct.unfreeze
         end
       end
 
       # Get stopped containers running
       unless ct.running?
-        provider.converge_by "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
+        action_handler.perform_action "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
           # Have to shell out to lxc-start for now, ct.start holds server sockets open!
           lxc_start = "lxc-start -d -n #{Shellwords.escape(provisioner_output['name'])}"
 # TODO add ability to change options on start
@@ -118,26 +118,26 @@ module ChefMetalLXC
       machine_for(node)
     end
 
-    def delete_machine(provider, node)
+    def delete_machine(action_handler, node)
       if node['normal'] && node['normal']['provisioner_output']
         provisioner_output = node['normal']['provisioner_output']
         ct = LXC::Container.new(provisioner_output['name'], lxc_path)
         if ct.defined?
-          provider.converge_by "delete lxc container #{provisioner_output['name']}" do
+          action_handler.perform_action "delete lxc container #{provisioner_output['name']}" do
             ct.destroy
           end
         end
       end
-      convergence_strategy_for(node).delete_chef_objects(provider, node)
+      convergence_strategy_for(node).delete_chef_objects(action_handler, node)
     end
 
-    def stop_machine(provider, node)
+    def stop_machine(action_handler, node)
       provisioner_options = node['normal']['provisioner_options']
       if node['normal'] && node['normal']['provisioner_output']
         provisioner_output = node['normal']['provisioner_output']
         ct = LXC::Container.new(provisioner_output['name'], lxc_path)
         if ct.running?
-          provider.converge_by "delete lxc container #{provisioner_output['name']}" do
+          action_handler.perform_action "delete lxc container #{provisioner_output['name']}" do
             ct.stop
           end
         end
