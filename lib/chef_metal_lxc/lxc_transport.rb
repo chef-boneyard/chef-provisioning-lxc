@@ -4,6 +4,8 @@ require 'chef/mixin/shell_out'
 require 'lxc/extra/proxy_client_side'
 require 'lxc/extra/proxy_server_side'
 require 'lxc/extra/channel'
+require 'uri'
+require 'socket'
 
 module ChefMetalLXC
   class LXCTransport < ChefMetal::Transport
@@ -51,32 +53,39 @@ module ChefMetalLXC
       end
     end
 
-    def forward_remote_port_to_local(remote_port, local_port)
-      Chef::Log.debug("Forwarding container port #{remote_port} to local port #{local_port}")
-      # Create the channel that will let the container and the host talk to each other
-      channel = LXC::Extra::Channel.new
+    def make_url_available_to_remote(local_url)
+      uri = URI(local_url)
+      host = Socket.getaddrinfo(uri.host, uri.scheme, nil, :STREAM)[0][3]
+      if host == '127.0.0.1' || host == '[::1]'
 
-      # Start the container side of the proxy, listening for client connections
-      pid = container.attach do
-        begin
-          server = TCPServer.new('127.0.0.1', remote_port)
-          proxy = LXC::Extra::ProxyClientSide.new(channel, server)
+        Chef::Log.debug("Forwarding container port #{uri.port} to local port #{uri.port}")
+        # Create the channel that will let the container and the host talk to each other
+        channel = LXC::Extra::Channel.new
+
+        # Start the container side of the proxy, listening for client connections
+        pid = container.attach do
+          begin
+            server = TCPServer.new('127.0.0.1', uri.port)
+            proxy = LXC::Extra::ProxyClientSide.new(channel, server)
+            proxy.start
+          rescue
+            Chef::Log.error("ERROR in proxy (container side): #{$!}\n#{$!.backtrace.join("\n")}")
+            raise
+          end
+        end
+
+        # Start the host side of the proxy, which contacts the real server
+        thread = Thread.new do
+          proxy = LXC::Extra::ProxyServerSide.new(channel) do
+            TCPSocket.new('127.0.0.1', uri.port)
+          end
           proxy.start
-        rescue
-          Chef::Log.error("ERROR in proxy (container side): #{$!}\n#{$!.backtrace.join("\n")}")
-          raise
         end
-      end
 
-      # Start the host side of the proxy, which contacts the real server
-      thread = Thread.new do
-        proxy = LXC::Extra::ProxyServerSide.new(channel) do
-          TCPSocket.new('127.0.0.1', local_port)
-        end
-        proxy.start
-      end
+        @port_forwards << [ pid, thread, channel ]
 
-      @port_forwards << [ pid, thread, channel ]
+      end
+      local_url
     end
 
     def read_file(path)
