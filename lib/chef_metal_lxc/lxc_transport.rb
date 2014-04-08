@@ -41,12 +41,13 @@ module ChefMetalLXC
       File.join(rootfs, path)
     end
 
-    def execute(command)
+    def execute(command, options = {})
       Chef::Log.info("Executing #{command} on #{name}")
       container.execute do
         begin
+          # TODO support streaming (shell out needs work)
           out = shell_out(command)
-          LXCExecuteResult.new(out.stdout,out.stderr, out.exitstatus)
+          LXCExecuteResult.new(out.stdout, out.stderr, out.exitstatus)
         rescue Exception => e
           LXCExecuteResult.new('', e.message, -1)
         end
