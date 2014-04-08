@@ -11,9 +11,9 @@ module ChefMetalLXC
   class LXCTransport < ChefMetal::Transport
     @@active_transports = []
 
-    class LXCExecuteResult < Struct.new(:stdout, :stderr, :exitstatus)
+    class LXCExecuteResult < Struct.new(:command, :options, :stdout, :stderr, :exitstatus)
       def error!
-        raise "Error: code #{exitstatus}.\nSTDOUT:#{stdout}\nSTDERR:#{stderr}" if exitstatus != 0
+        raise "Error: '#{command}' failed with exit code #{exitstatus}.\nSTDOUT:#{stdout}\nSTDERR:#{stderr}" if exitstatus != 0
       end
     end
 
@@ -47,7 +47,7 @@ module ChefMetalLXC
         begin
           # TODO support streaming (shell out needs work)
           out = shell_out(command)
-          LXCExecuteResult.new(out.stdout, out.stderr, out.exitstatus)
+          LXCExecuteResult.new(command, options, out.stdout, out.stderr, out.exitstatus)
         rescue Exception => e
           LXCExecuteResult.new('', e.message, -1)
         end
