@@ -43,7 +43,7 @@ module ChefMetalLXC
 
     def execute(command, options = {})
       Chef::Log.info("Executing #{command} on #{name}")
-      container.execute do
+      container.execute(:timeout => (execute_timeout(options) || 0)) do
         begin
           # TODO support streaming (shell out needs work)
           out = shell_out(command)
@@ -66,7 +66,7 @@ module ChefMetalLXC
         # Start the container side of the proxy, listening for client connections
         pid = container.attach do
           begin
-            server = TCPServer.new('127.0.0.1', uri.port)
+            server = TCPServer.new(host, uri.port)
             proxy = LXC::Extra::ProxyClientSide.new(channel, server)
             proxy.start
           rescue
@@ -78,7 +78,7 @@ module ChefMetalLXC
         # Start the host side of the proxy, which contacts the real server
         thread = Thread.new do
           proxy = LXC::Extra::ProxyServerSide.new(channel) do
-            TCPSocket.new('127.0.0.1', uri.port)
+            TCPSocket.new(host, uri.port)
           end
           proxy.start
         end
