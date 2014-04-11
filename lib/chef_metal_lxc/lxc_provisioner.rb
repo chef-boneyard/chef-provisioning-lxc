@@ -152,7 +152,10 @@ module ChefMetalLXC
 
     def convergence_strategy_for(node)
       @convergence_strategy ||= begin
-        ChefMetal::ConvergenceStrategy::InstallCached.new
+        options = {}
+        provisioner_options = node['normal']['provisioner_options'] || {}
+        options[:chef_client_timeout] = provisioner_options['chef_client_timeout'] if provisioner_options.has_key?('chef_client_timeout')
+        ChefMetal::ConvergenceStrategy::InstallCached.new(options)
       end
     end
 
