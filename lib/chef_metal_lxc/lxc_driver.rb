@@ -74,7 +74,7 @@ module ChefMetalLXC
           #
           # Create the machine
           #
-          ct.create(machine_options[:template], machine_options[:backingstore], 0, machine_options[:template_options])
+          ct.create(machine_options[:template], machine_options[:backingstore], machine_options[:devspecs], 0, machine_options[:template_options])
 
           machine_spec.location = {
             'driver_url' => driver_url,
