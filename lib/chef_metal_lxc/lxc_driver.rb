@@ -57,7 +57,7 @@ module ChefMetalLXC
       end
 
       unless ct.defined?
-        action_handler.perform_action "create lxc container #{machine_spec.location['name']}" do
+        action_handler.perform_action "create lxc container #{ct.name}" do
           #
           # Set config
           #
