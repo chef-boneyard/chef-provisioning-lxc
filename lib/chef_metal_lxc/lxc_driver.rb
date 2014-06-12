@@ -3,6 +3,7 @@ require 'chef_metal/driver'
 require 'chef_metal/machine/unix_machine'
 require 'chef_metal/convergence_strategy/install_cached'
 require 'chef_metal_lxc/lxc_transport'
+require 'chef_metal_lxc/version'
 require 'lxc'
 require 'shellwords'
 
