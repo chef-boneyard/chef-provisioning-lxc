@@ -1,3 +1,3 @@
-require 'chef_metal_vagrant/vagrant_driver'
+require 'chef_metal_lxc/lxc_driver'
 
-ChefMetal.register_driver_class("vagrant", ChefMetalVagrant::VagrantDriver)
+ChefMetal.register_driver_class('lxc', ChefMetalLXC::LXCDriver)
