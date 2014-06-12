@@ -118,7 +118,7 @@ module ChefMetalLXC
       end
 
       # Create machine object for callers to use
-      machine_for(machine_spec, machine_optionsß)
+      machine_for(machine_spec, machine_options)
     end
 
     # Connect to machine without acquiring it
