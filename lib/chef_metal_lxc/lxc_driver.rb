@@ -81,7 +81,7 @@ module ChefMetalLXC
             'driver_url' => driver_url,
             'driver_version' => ChefMetalLXC::VERSION,
             'name' => machine_spec.name,
-            'host_node' => machine_spec.host_node,
+            'host_node' => action_handler.host_node,
             'allocated_at' => Time.now.utc.to_s
           }
         end
