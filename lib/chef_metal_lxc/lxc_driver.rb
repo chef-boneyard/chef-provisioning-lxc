@@ -135,7 +135,7 @@ module ChefMetalLXC
           end
         end
       end
-      convergence_strategy_for(machine_options).cleanup_convergence(action_handler, machine_spec)
+      convergence_strategy_for(machine_spec, machine_options).cleanup_convergence(action_handler, machine_spec)
     end
 
     def stop_machine(action_handler, node)
@@ -152,7 +152,7 @@ module ChefMetalLXC
     protected
 
     def machine_for(machine_spec, machine_options)
-      ChefMetal::Machine::UnixMachine.new(machine_spec, transport_for(machine_spec), convergence_strategy_for(machine_options))
+      ChefMetal::Machine::UnixMachine.new(machine_spec, transport_for(machine_spec), convergence_strategy_for(machine_spec, machine_options))
     end
 
     def convergence_strategy_for(machine_spec, machine_options)
