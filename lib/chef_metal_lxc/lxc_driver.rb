@@ -57,16 +57,16 @@ module ChefMetalLXC
       end
 
       unless ct.defined?
-        action_handler.perform_action "create lxc container #{provisioner_output['name']}" do
+        action_handler.perform_action "create lxc container #{machine_spec.location['name']}" do
           #
           # Set config
           #
           # TODO if config file changes, reload container?
-          if provisioner_options['config_file']
-            ct.load_config(provisioner_options['config_file'])
+          if machine_options[:config_file]
+            ct.load_config(machine_options[:config_file])
           end
-          if provisioner_options['extra_config']
-            provisioner_options['extra_config'].each_pair do |key, value|
+          if machine_options[:extra_config]
+            machine_options[:extra_config].each_pair do |key, value|
               ct.set_config_item(key, value)
             end
           end
@@ -74,7 +74,7 @@ module ChefMetalLXC
           #
           # Create the machine
           #
-          ct.create(provisioner_options['template'], provisioner_options['backingstore'], 0, provisioner_options['template_options'])
+          ct.create(machine_options[:template], machine_options[:backingstore], 0, machine_options[:template_options])
 
           machine_spec.location = {
             'driver_url' => driver_url,
@@ -92,22 +92,22 @@ module ChefMetalLXC
 
       # Unfreeze the frozen
       if ct.state == :frozen
-        action_handler.perform_action "unfreeze lxc container #{provisioner_output['name']} (state is #{ct.state})" do
+        action_handler.perform_action "unfreeze lxc container #{machine_spec.location['name']} (state is #{ct.state})" do
           ct.unfreeze
         end
       end
 
       # Get stopped containers running
       unless ct.running?
-        action_handler.perform_action "start lxc container #{provisioner_output['name']} (state is #{ct.state})" do
+        action_handler.perform_action "start lxc container #{machine_spec.location['name']} (state is #{ct.state})" do
           # Have to shell out to lxc-start for now, ct.start holds server sockets open!
-          lxc_start = "lxc-start -d -n #{Shellwords.escape(provisioner_output['name'])}"
+          lxc_start = "lxc-start -d -n #{Shellwords.escape(machine_spec.location['name'])}"
 # TODO add ability to change options on start
-#          if provisioner_options['config_file']
-#            lxc_start << " -f #{Shellwords.escape(provisioner_options['config_file'])}"
+#          if machine_options[:config_file]
+#            lxc_start << " -f #{Shellwords.escape(machine_options[:config_file])}"
 #          end
-#          if provisioner_options['extra_config']
-#            provisioner_options['extra_config'].each_pair do |key,value|
+#          if machine_options[:extra_config]
+#            machine_options[:extra_config].each_pair do |key,value|
 #              lxc_start << " -s #{Shellwords.escape("#{key}=#{value}")}"
 #            end
 #          end
