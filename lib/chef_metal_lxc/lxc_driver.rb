@@ -17,12 +17,16 @@ module ChefMetalLXC
     # <path> defaults to LXC config 'lxc.lxcpath'
     # canonical URL calls realpath on <path>
     def self.from_url(driver_url, config)
+      LXCDriver.new(driver_url, config)
+    end
+
+    def self.canonicalize_url(driver_url, config)
       scheme, lxc_path = driver_url.split(':', 2)
       if lxc_path.nil? || lxc_path == ':'
         lxc_path = LXC.global_config_item('lxc.lxcpath')
       end
       lxc_path = File.realpath(lxc_path)
-      LXCDriver.new("lxc:#{lxc_path}", config)
+      [ "lxc:#{lxc_path}", config ]
     end
 
     def initialize(driver_url, config)
