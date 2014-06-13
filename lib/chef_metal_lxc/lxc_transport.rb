@@ -25,7 +25,7 @@ module ChefMetalLXC
       @options = options
       @name = name
       @lxc_path = lxc_path
-      @port_forwards = []
+      @port_forwards = {}
       @@active_transports << self
     end
 
@@ -57,33 +57,37 @@ module ChefMetalLXC
     def make_url_available_to_remote(local_url)
       uri = URI(local_url)
       host = Socket.getaddrinfo(uri.host, uri.scheme, nil, :STREAM)[0][3]
-      if host == '127.0.0.1' || host == '[::1]'
+      if host == '127.0.0.1' || host == '::1'
+        unless @port_forwards[uri.port]
 
-        Chef::Log.debug("Forwarding container port #{uri.port} to local port #{uri.port}")
-        # Create the channel that will let the container and the host talk to each other
-        channel = LXC::Extra::Channel.new
+          Chef::Log.debug("Forwarding container port #{uri.port} to local port #{uri.port}")
+          # Create the channel that will let the container and the host talk to each other
+          channel = LXC::Extra::Channel.new
 
-        # Start the container side of the proxy, listening for client connections
-        pid = container.attach do
-          begin
-            server = TCPServer.new(host, uri.port)
-            proxy = LXC::Extra::ProxyClientSide.new(channel, server)
+          # Start the container side of the proxy, listening for client connections
+          pid = container.attach do
+            begin
+              server = TCPServer.new(host, uri.port)
+              proxy = LXC::Extra::ProxyClientSide.new(channel, server)
+              proxy.start
+            rescue
+              Chef::Log.error("ERROR in proxy (container side): #{$!}\n#{$!.backtrace.join("\n")}")
+              raise
+            end
+          end
+
+          # Start the host side of the proxy, which contacts the real server
+          thread = Thread.new do
+            proxy = LXC::Extra::ProxyServerSide.new(channel) do
+              TCPSocket.new(host, uri.port)
+            end
             proxy.start
-          rescue
-            Chef::Log.error("ERROR in proxy (container side): #{$!}\n#{$!.backtrace.join("\n")}")
-            raise
           end
-        end
 
-        # Start the host side of the proxy, which contacts the real server
-        thread = Thread.new do
-          proxy = LXC::Extra::ProxyServerSide.new(channel) do
-            TCPSocket.new(host, uri.port)
-          end
-          proxy.start
-        end
+          Chef::Log.debug("Forwarded #{uri.port} on container #{name} to local port #{uri.port}.  Container listener id PID #{pid}")
 
-        @port_forwards << [ pid, thread, channel ]
+          @port_forwards[uri.port] = [ pid, thread, channel ]
+        end
 
       end
       local_url
@@ -111,8 +115,10 @@ module ChefMetalLXC
     end
 
     def disconnect
-      @port_forwards.each do |pid, thread, channel|
+      @port_forwards.each_pair do |port, (pid, thread, channel)|
+        Chef::Log.debug("stopping port forward #{port} for container #{name}")
         begin
+          Chef::Log.debug("Killing PID #{pid}")
           Process.kill('KILL', pid)
         rescue
         end
@@ -121,7 +127,7 @@ module ChefMetalLXC
         rescue
         end
       end
-      @port_forwards = []
+      @port_forwards = {}
       @@active_transports.delete(self)
     end
 

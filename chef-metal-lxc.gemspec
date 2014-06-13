@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/opscode/chef-metal-lxc'
 
   s.add_dependency 'chef'
-  s.add_dependency 'chef-metal', '~> 0.8', '>= 0.8.2'
-  s.add_dependency 'ruby-lxc', '~> 1.0', '>= 1.0.2'
+  s.add_dependency 'chef-metal', '~> 0.11'
+  s.add_dependency 'ruby-lxc', '~> 1.1'
   s.add_dependency 'lxc-extra', '~> 0.0', '>= 0.0.3'
 
   s.add_development_dependency 'rspec'
