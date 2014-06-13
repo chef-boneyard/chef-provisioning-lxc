@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.5 (6/13/2014)
+
+Adjust to chef-metal 0.11
+
 == 0.4 (4/8/2014)
 
 Adjust to chef-metal 0.8 transport interface
