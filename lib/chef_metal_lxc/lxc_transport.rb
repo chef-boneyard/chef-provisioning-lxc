@@ -47,7 +47,8 @@ module ChefMetalLXC
         begin
           # TODO support streaming (shell out needs work)
           out = shell_out(command)
-          LXCExecuteResult.new(command, options, out.stdout, out.stderr, out.exitstatus)
+          Chef::Log.info(options.inspect)
+          LXCExecuteResult.new(command, {}, out.stdout, out.stderr, out.exitstatus)
         rescue Exception => e
           LXCExecuteResult.new('', e.message, -1)
         end
@@ -94,24 +95,43 @@ module ChefMetalLXC
     end
 
     def read_file(path)
-      if File.exists?(container_path(path))
-        File.read(container_path(path))
+      container.execute do
+        if File.exists?(path)
+          File.read(path)
+        end
       end
     end
 
     def download_file(path, local_path)
       Chef::Log.debug("Copying file #{path} from #{name} to local #{local_path}")
-      FileUtils.cp_r(container_path(path), local_path)
+      File.open(local_path, 'w') do |f|
+        f.write(read_file)
+      end
     end
 
     def write_file(path, content)
-      File.open(container_path(path), 'w') do |f|
-        f.write(content)
+      container.execute do
+        begin
+          File.open(path, 'w') do |f|
+            f.write(content)
+          end
+        rescue Exception => e
+          LXCExecuteResult.new('', e.message, -1)
+        end
       end
     end
 
     def upload_file(local_path, path)
-      FileUtils.cp_r(local_path, container_path(path))
+      content = File.open(local_path){|f| f.read}
+      container.execute do
+        begin
+          File.open(path, 'w') do |f|
+            f.write(content)
+          end
+        rescue Exception => e
+          LXCExecuteResult.new('', e.message, -1)
+        end
+      end
     end
 
     def disconnect
