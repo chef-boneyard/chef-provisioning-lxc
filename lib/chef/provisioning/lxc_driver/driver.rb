@@ -1,15 +1,17 @@
 require 'chef/mixin/shell_out'
-require 'chef_metal/driver'
-require 'chef_metal/machine/unix_machine'
-require 'chef_metal/convergence_strategy/install_cached'
-require 'chef_metal_lxc/lxc_transport'
-require 'chef_metal_lxc/version'
+require 'chef/provisioning/driver'
+require 'chef/provisioning/machine/unix_machine'
+require 'chef/provisioning/convergence_strategy/install_cached'
+require 'chef/provisioning/lxc_driver/lxc_transport'
+require 'chef/provisioning/lxc_driver/version'
 require 'lxc'
 require 'shellwords'
 
-module ChefMetalLXC
+class Chef
+module Provisioning
+module LXCDriver
   # Provisions machines in lxc.
-  class LXCDriver < ChefMetal::Driver
+  class Driver < Chef::Provisioning::Driver
 
     include Chef::Mixin::ShellOut
 
@@ -18,7 +20,7 @@ module ChefMetalLXC
     # <path> defaults to LXC config 'lxc.lxcpath'
     # canonical URL calls realpath on <path>
     def self.from_url(driver_url, config)
-      LXCDriver.new(driver_url, config)
+      Driver.new(driver_url, config)
     end
 
     def self.canonicalize_url(driver_url, config)
@@ -79,7 +81,7 @@ module ChefMetalLXC
 
           machine_spec.location = {
             'driver_url' => driver_url,
-            'driver_version' => ChefMetalLXC::VERSION,
+            'driver_version' => Chef::Provisioning::LXCDriver::VERSION,
             'name' => machine_spec.name,
             'host_node' => action_handler.host_node,
             'allocated_at' => Time.now.utc.to_s
@@ -152,15 +154,17 @@ module ChefMetalLXC
     protected
 
     def machine_for(machine_spec, machine_options)
-      ChefMetal::Machine::UnixMachine.new(machine_spec, transport_for(machine_spec), convergence_strategy_for(machine_spec, machine_options))
+      Chef::Provisioning::Machine::UnixMachine.new(machine_spec, transport_for(machine_spec), convergence_strategy_for(machine_spec, machine_options))
     end
 
     def convergence_strategy_for(machine_spec, machine_options)
-      ChefMetal::ConvergenceStrategy::InstallCached.new(machine_options[:convergence_options], config)
+      Chef::Provisioning::ConvergenceStrategy::InstallCached.new(machine_options[:convergence_options], config)
     end
 
     def transport_for(machine_spec)
-      ChefMetalLXC::LXCTransport.new(machine_spec.location['name'], lxc_path)
+      Chef::Provisioning::LXCDriver::LXCTransport.new(machine_spec.location['name'], lxc_path)
     end
   end
+end
+end
 end

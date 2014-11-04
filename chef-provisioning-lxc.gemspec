@@ -1,19 +1,19 @@
 $:.unshift(File.dirname(__FILE__) + '/lib')
-require 'chef_metal_lxc/version'
+require 'chef/provisioning/lxc_driver/version'
 
 Gem::Specification.new do |s|
-  s.name = 'chef-metal-lxc'
-  s.version = ChefMetalLXC::VERSION
+  s.name = 'chef-provisioning-lxc'
+  s.version = Chef::Provisioning::LXCDriver::VERSION
   s.platform = Gem::Platform::RUBY
   s.extra_rdoc_files = ['README.md', 'LICENSE' ]
   s.summary = 'Provisioner for creating LXC containers in Chef Metal.'
   s.description = s.summary
   s.author = 'Ranjib Dey'
   s.email = 'dey.ranjib@gmail.com'
-  s.homepage = 'https://github.com/opscode/chef-metal-lxc'
+  s.homepage = 'https://github.com/opscode/chef-provisioning-lxc'
 
   s.add_dependency 'chef'
-  s.add_dependency 'chef-metal', '~> 0.11'
+  s.add_dependency 'chef-provisioning', '~> 0.11'
   s.add_dependency 'ruby-lxc', '~> 1.1'
   s.add_dependency 'lxc-extra', '~> 0.0', '>= 0.0.3'
 

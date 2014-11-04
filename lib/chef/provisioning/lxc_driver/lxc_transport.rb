@@ -1,4 +1,4 @@
-require 'chef_metal/transport'
+require 'chef/provisioning/transport'
 require 'lxc/extra'
 require 'chef/mixin/shell_out'
 require 'lxc/extra/proxy_client_side'
@@ -7,8 +7,10 @@ require 'lxc/extra/channel'
 require 'uri'
 require 'socket'
 
-module ChefMetalLXC
-  class LXCTransport < ChefMetal::Transport
+class Chef
+module Provisioning
+module LXCDriver
+  class LXCTransport < Chef::Provisioning::Transport
     @@active_transports = []
 
     class LXCExecuteResult < Struct.new(:command, :options, :stdout, :stderr, :exitstatus)
@@ -147,7 +149,9 @@ module ChefMetalLXC
     end
   end
 end
+end
+end
 
 at_exit do
-  ChefMetalLXC::LXCTransport.disconnect_active_transports
+  Chef::Provisioning::LXCDriver::LXCTransport.disconnect_active_transports
 end

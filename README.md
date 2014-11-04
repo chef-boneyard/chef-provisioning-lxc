@@ -1,13 +1,13 @@
-# chef-metal-lxc
+# chef-provisioning-lxc
 
-This is the LXC provisioner for chef-metal.
+This is the LXC provisioner for chef-provisioning.
 
 ## Quick Start
 
 To run the tests, which creates an Ubuntu machine and installs this into it:
 
 ```
-gem install chef-metal
+gem install chef-provisioning
 rake build
 cd test/
 chef-client -z vagrant.rb ubuntu12.rb test_machine.rb
@@ -16,15 +16,15 @@ chef-client -z vagrant.rb ubuntu12.rb test_machine.rb
 ## Basic Usage
 
 ```ruby
-require 'chef_metal_lxc/lxc_provisioner'
-with_provisioner ChefMetalLXC::LXCProvisioner.new
+require 'chef/provisioning/lxc_driver/lxc_provisioner'
+with_provisioner Chef::Provisioning::LXCDriver::LXCProvisioner.new
 ```
 
 ## Provisioner Creation
 
 The provisioner represents lxc containers in a directory.
 
-`ChefMetalLXC::LXCProvisioner.new(...)`
+`Chef::Provisioning::LXCDriver::LXCProvisioner.new(...)`
 
 ### Arguments
 
