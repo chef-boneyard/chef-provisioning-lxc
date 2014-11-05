@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.6 (8/1/2014)
+
+Rename to chef-provisioning-lxc
+
 == 0.5 (6/13/2014)
 
 Adjust to chef-provisioning 0.11
