@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.email = 'dey.ranjib@gmail.com'
   s.homepage = 'https://github.com/opscode/chef-provisioning-lxc'
 
-  s.add_dependency 'chef'
-  s.add_dependency 'chef-provisioning', '~> 0.11'
+  s.add_dependency 'chef', '>= 12.0.3'
+  s.add_dependency 'chef-provisioning'
   s.add_dependency 'ruby-lxc', '~> 1.1'
   s.add_dependency 'lxc-extra', '~> 0.0', '>= 0.0.3'
 
