@@ -143,12 +143,7 @@ class Chef
         end
 
         def available?
-          begin
-            execute('pwd')
-            true
-          rescue Exception =>e
-            false
-          end
+          container.running?
         end
 
         def self.disconnect_active_transports
