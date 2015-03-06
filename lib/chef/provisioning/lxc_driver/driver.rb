@@ -76,8 +76,13 @@ module LXCDriver
 
           #
           # Create the machine
-          #
-          ct.create(machine_options[:template], machine_options[:backingstore], machine_options[:devspecs], 0, machine_options[:template_options])
+          ct.create(
+            machine_options[:template],
+            machine_options[:backingstore],
+            machine_options[:devspecs] || {},
+            machine_options[:flags] || 0,
+            machine_options[:template_options] || []
+          )
 
           machine_spec.location = {
             'driver_url' => driver_url,
@@ -101,21 +106,9 @@ module LXCDriver
       end
 
       # Get stopped containers running
-      unless ct.running?
+      if ct.defined? and not ct.running?
         action_handler.perform_action "start lxc container #{machine_spec.location['name']} (state is #{ct.state})" do
-          # Have to shell out to lxc-start for now, ct.start holds server sockets open!
-          lxc_start = "lxc-start -d -n #{Shellwords.escape(machine_spec.location['name'])}"
-# TODO add ability to change options on start
-#          if machine_options[:config_file]
-#            lxc_start << " -f #{Shellwords.escape(machine_options[:config_file])}"
-#          end
-#          if machine_options[:extra_config]
-#            machine_options[:extra_config].each_pair do |key,value|
-#              lxc_start << " -s #{Shellwords.escape("#{key}=#{value}")}"
-#            end
-#          end
-          shell_out!(lxc_start)
-#          ct.start
+          ct.start
         end
       end
 
