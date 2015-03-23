@@ -1,11 +1,17 @@
 require 'chef/provisioning'
+
 with_driver 'lxc'
-# default ubuntu template will install 14.04, where chef is not well tested, lets use 12.04
-with_machine_options :template => 'ubuntu',
-                     :template_options => ['-r','precise'],
+
+directory '/tmp/chef-repo'
+with_chef_local_server chef_repo_path: '/tmp/chef-repo'
+
+with_machine_options :template => 'download',
+                     :template_options => %w( -d ubuntu -a amd64 -r trusty ),
                      :config_file => '/tmp/empty.conf',
                      :extra_config => { 'lxc.network.type' => 'empty' }
+
 file '/tmp/empty.conf' do
   content ''
 end
-machine 'simple'
+
+machine 'simple2'

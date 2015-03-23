@@ -1,0 +1,28 @@
+---
+driver:
+  name: vagrant
+  customize:
+    memory: 4096
+
+provisioner:
+  name: chef_solo
+
+platforms:
+  - name: ubuntu-12.04
+  - name: ubuntu-14.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[lxctests::install_chef_provisioning]
+      - recipe[lxctests::simple]
+      - recipe[lxctests::simple2]
+    attributes: {
+      apt: {
+        compile_time_update: true
+      },
+      build-essential: {
+        compile_time: true
+      }
+    }
+
