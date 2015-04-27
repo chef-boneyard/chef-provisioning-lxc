@@ -1,4 +1,4 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 gemfile
 gemspec
 
@@ -7,3 +7,6 @@ gem 'chef-provisioning', github: 'chef/chef-provisioning'
 group :development do
   gem 'pry'
 end
+
+gem 'test-kitchen'
+gem 'kitchen-vagrant'

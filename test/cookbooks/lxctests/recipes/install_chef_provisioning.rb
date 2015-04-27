@@ -1,9 +1,9 @@
 include_recipe 'lxctests::install_lxc'
 
 chef_gem 'chef-provisioning' do
-        action :install
+  compile_time true
 end
 
 chef_gem 'chef-provisioning-lxc' do
-        action :install
+  compile_time true
 end
