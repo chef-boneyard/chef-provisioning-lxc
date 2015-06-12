@@ -1,5 +1,4 @@
 require 'chef/provisioning'
-::Chef::Config.from_file '/home/ranjib/workspace/foss/chef-provisioning-lxc/.chef/knife.rb'
 with_driver 'lxc'
 # default ubuntu template will install 14.04, where chef is not well tested, lets use 12.04
 machine 'simple' do
