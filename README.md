@@ -4,14 +4,20 @@ This is the LXC provisioner for chef-provisioning.
 
 ## Quick Start
 
-To run the tests, which creates an Ubuntu machine and installs this into it:
+Assuming you have host with working LXC setup already, you can directly invoke an example recipe using chef localmode
 
+- Clone chef-provisioning-lxc repo
+```sh
+git clone https://github.com/chef/chef-provisioning-lxc
 ```
-gem install chef-provisioning
-rake build
-cd test/
-set -x CHEF_DRIVER 'lxc'
-chef-client -z lxc.rb simple.rb
+- Run bundle install
+```sh
+bundle install
+```
+- Execute the test recipe to create a linux container
+
+```sh
+bundle exec chef-client -z -o recipe[lxctests::simple] -c test/client.rb
 ```
 
 ## Basic Usage
