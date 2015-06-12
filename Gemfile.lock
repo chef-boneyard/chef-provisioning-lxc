@@ -13,7 +13,7 @@ GIT
 PATH
   remote: .
   specs:
-    chef-provisioning-lxc (0.6)
+    chef-provisioning-lxc (0.6.1)
       chef (>= 12.0.3)
       chef-provisioning
       lxc-extra (~> 0.0, >= 0.0.3)
