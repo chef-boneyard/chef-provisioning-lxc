@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.email = 'dey.ranjib@gmail.com'
   s.homepage = 'https://github.com/chef/chef-provisioning-lxc'
 
-  s.add_dependency 'chef-provisioning'
+  s.add_dependency 'chef-provisioning', '~> 1.0'
   s.add_dependency 'lxc-extra', '~> 0.0', '>= 0.0.3'
 
   s.add_development_dependency 'rspec'
