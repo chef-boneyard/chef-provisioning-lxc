@@ -60,7 +60,9 @@ class Chef
 
         def make_url_available_to_remote(local_url)
           uri = URI(local_url)
-          host = Socket.getaddrinfo(uri.host, uri.scheme, nil, :STREAM)[0][3]
+          uri_scheme = uri.scheme
+          uri_scheme = nil if uri.scheme == 'chefzero'
+          host = Socket.getaddrinfo(uri.host, uri_scheme, nil, :STREAM)[0][3]
           if host == '127.0.0.1' || host == '::1'
             unless @port_forwards[uri.port]
 

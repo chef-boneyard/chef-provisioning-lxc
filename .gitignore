@@ -1,0 +1,5 @@
+Gemfile.lock
+.bundle
+test/nodes
+test/cache
+test/clients
