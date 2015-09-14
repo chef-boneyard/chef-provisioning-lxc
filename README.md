@@ -1,6 +1,6 @@
 # MAINTAINERS WANTED
 
-We are actively seeking maintainers for chef-provisioning-lxc.  If you are interested in maintaining it, please contact us in the [gitter](https://github.com/chef/chef-provisioning-lxc)
+We are actively seeking maintainers for the chef-provisioning-lxc driver. This project is not under active maintenance by CHEF, and does not currently pass tests with the latest version of [chef-provisioning](https://github.com/chef/chef-provisioning). If you are interested in maintaining it, please contact us in the [gitter](https://github.com/chef/chef-provisioning-lxc).
 
 # chef-provisioning-lxc
 
