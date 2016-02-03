@@ -1,5 +1,7 @@
 Gemfile.lock
 .bundle
+bin/
+pkg/
 test/nodes
 test/cache
 test/clients
