@@ -1,5 +1,12 @@
 sudo: false
 language: ruby
+branches:
+  only:
+    - master
+addons:
+  apt:
+    packages:
+      - lxc-dev
 rvm:
   - 2.1.9
   - 2.2.5
