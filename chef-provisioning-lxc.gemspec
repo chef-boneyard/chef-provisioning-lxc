@@ -6,13 +6,13 @@ Gem::Specification.new do |s|
   s.version = Chef::Provisioning::LXCDriver::VERSION
   s.platform = Gem::Platform::RUBY
   s.extra_rdoc_files = ['README.md', 'LICENSE' ]
-  s.summary = 'Provisioner for creating LXC containers in Chef Metal.'
+  s.summary = 'Provisioner for creating LXC containers in Chef Provisioning.'
   s.description = s.summary
   s.author = 'Ranjib Dey'
   s.email = 'dey.ranjib@gmail.com'
   s.homepage = 'https://github.com/chef/chef-provisioning-lxc'
 
-  s.add_dependency 'chef-provisioning', '~> 1.0'
+  s.add_dependency 'chef-provisioning', '>= 1.0', '< 3.0'
   s.add_dependency 'lxc-extra', '~> 0.0', '>= 0.0.3'
 
   s.add_development_dependency 'rspec'
